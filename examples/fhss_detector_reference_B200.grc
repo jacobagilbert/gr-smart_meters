@@ -103,7 +103,7 @@ blocks:
   id: variable
   parameters:
     comment: "UPDATE ME! \nChange the syncwords to match bursts of interest"
-    value: '''10101010101010101010101010101010101010101010101010'''
+    value: '''101010101010101000000000'''
   states:
     bus_sink: false
     bus_source: false
@@ -174,9 +174,23 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1440, 440.0]
+    coordinate: [1136, 448.0]
     rotation: 0
     state: disabled
+- name: blocks_message_debug_0_1_1
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1096, 1552.0]
+    rotation: 0
+    state: enabled
 - name: blocks_probe_rate_0
   id: blocks_probe_rate
   parameters:
@@ -197,7 +211,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1152, 396.0]
+    coordinate: [816, 396.0]
     rotation: 0
     state: true
 - name: blocks_socket_pdu_0
@@ -217,7 +231,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [984, 1588.0]
+    coordinate: [1096, 1660.0]
     rotation: 0
     state: true
 - name: burst_width
@@ -330,7 +344,7 @@ blocks:
     channel_freqs: '[]'
     comment: ''
     maxoutbuf: '0'
-    method: fhss_utils.RMS
+    method: fhss_utils.MIDDLE_OUT
     minoutbuf: '0'
     snr_min: '10.0'
     thresh_min: '-25.0'
@@ -555,19 +569,6 @@ blocks:
     coordinate: [1312, 692.0]
     rotation: 0
     state: true
-- name: note_2_0
-  id: note
-  parameters:
-    alias: ''
-    comment: ''
-    note: ====> DEFRAMER
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [672, 1556.0]
-    rotation: 0
-    state: enabled
 - name: output_attenuation
   id: parameter
   parameters:
@@ -627,7 +628,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    offset: '0'
+    offset: '-8'
     syncwords: syncwords
     threshold: '0'
   states:
@@ -706,7 +707,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [372, 1304]
+    coordinate: [336, 1204.0]
     rotation: 0
     state: enabled
 - name: pdu_utils_pdu_fir_filter_1
@@ -739,7 +740,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [102, 1292]
+    coordinate: [128, 1292.0]
     rotation: 0
     state: true
 - name: pdu_utils_pdu_split_0_0
@@ -757,7 +758,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1040, 1112.0]
+    coordinate: [1016, 1112.0]
     rotation: 0
     state: enabled
 - name: post_burst_time
@@ -1046,7 +1047,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [328, 1152.0]
+    coordinate: [336, 1096.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0_0
@@ -1107,7 +1108,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1160, 532.0]
+    coordinate: [832, 540.0]
     rotation: 0
     state: enabled
 - name: samp_rate
@@ -1144,7 +1145,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [672, 1604.0]
+    coordinate: [744, 1644.0]
     rotation: 0
     state: true
 - name: uhd_usrp_source_1
@@ -1580,7 +1581,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [624, 468.0]
+    coordinate: [232, 468.0]
     rotation: 0
     state: enabled
 - name: virtual_sink_0
@@ -1593,7 +1594,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [936, 508.0]
+    coordinate: [552, 516.0]
     rotation: 0
     state: enabled
 - name: virtual_sink_0_0
@@ -1619,7 +1620,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1040, 1372.0]
+    coordinate: [1016, 1356.0]
     rotation: 0
     state: enabled
 - name: virtual_source_0
@@ -1645,7 +1646,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [936, 444.0]
+    coordinate: [552, 452.0]
     rotation: 0
     state: enabled
 - name: virtual_source_0_2
@@ -1658,7 +1659,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [56, 1180.0]
+    coordinate: [48, 1156.0]
     rotation: 0
     state: enabled
 - name: virtual_source_0_2_0
@@ -1691,6 +1692,7 @@ connections:
 - [pdu_utils_pdu_fir_filter_1, pdu_out, pdu_utils_pdu_fine_time_measure_0, pdu_in]
 - [pdu_utils_pdu_quadrature_demod_cf_0, fpdus, pdu_utils_pdu_fir_filter_0, pdu_in]
 - [pdu_utils_pdu_split_0_0, dict, blocks_message_debug_0_1, print]
+- [smart_meters_GridStream_0, pdu_out, blocks_message_debug_0_1_1, print_pdu]
 - [smart_meters_GridStream_0, pdu_out, blocks_socket_pdu_0, pdus]
 - [uhd_usrp_source_1, '0', virtual_sink_0, '0']
 - [virtual_source_0, '0', fhss_utils_fft_burst_tagger_0, '0']
