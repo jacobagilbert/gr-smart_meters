@@ -94,6 +94,18 @@ GridStream_impl::crc16(uint16_t crc, const std::vector<uint8_t>& data, size_t si
     return crc;
 }
 
+// consolidates 4 byte fields into a single integer value LSB first
+uint64_t
+GridStream_impl::bytes_to_int(const std::vector<uint8_t> &data, size_t start_index)
+{
+    uint64_t out = data[start_index];
+    for (auto ii = 1; ii < 4; ii++) {
+        out *= 256;
+        out += data[start_index+ii];
+    }
+    return out;
+}
+
 void GridStream_impl::pdu_handler(pmt::pmt_t pdu)
 {
     pmt::pmt_t meta = pmt::car(pdu);
@@ -131,9 +143,9 @@ void GridStream_impl::pdu_handler(pmt::pmt_t pdu)
         offset += 10;
     }
     // Packet decoded 00,FF,2A,packet_type(xx),packet_len(xxxx)
-    int packet_type = out[3];
-    int packet_len = out[5] | out[4] << 8;
-
+    uint32_t packet_type = out[3];
+    uint32_t packet_len = out[5] | out[4] << 8;
+        
     // Loop to decode data based on packet_len
     if (data.size() > packet_len) {
         for (int ii = 0; ii < packet_len; ii++) {
@@ -153,16 +165,32 @@ void GridStream_impl::pdu_handler(pmt::pmt_t pdu)
     } else {
         return;
     }
-    int meterID{ 0 };
-    int meterID2{ 0 };
-    int upTime{ 0 };
+
+    uint32_t packet_subtype = out[6];
+    meta = pmt::dict_add(meta, pmt::mp("type"), pmt::from_uint64(packet_type));
+    meta = pmt::dict_add(meta, pmt::mp("subtype"), pmt::from_uint64(packet_subtype));
+    meta = pmt::dict_add(meta, pmt::mp("length"), pmt::from_uint64(packet_len));
+
+    uint32_t meterID{ 0 };
+    uint32_t meterID2{ 0 };
+    uint32_t upTime{ 0 };
+    uint32_t counter;
+    float timing;
 
     if (packet_type == 0x55 && packet_len == 0x0023) {
-        meterID = out[27 + 2] | out[26 + 2] << 8 | out[25 + 2] << 16 | out[24 + 2] << 24;
-        upTime = out[21 + 2] | out[20 + 2] << 8 | out[19 + 2] << 16 | out[18 + 2] << 24;
+        meterID = bytes_to_int(out, 26);
+        upTime = bytes_to_int(out, 20);
+        counter = out[17];
+        timing = out[36] | out[35] << 8;
+        meta = pmt::dict_add(meta, pmt::mp("meterID1"), pmt::from_uint64(meterID));
+        meta = pmt::dict_add(meta, pmt::mp("uptime"), pmt::from_uint64(upTime));
     } else if (packet_type == 0xD5) {
-        meterID2 = out[8 + 2] | out[7 + 2] << 8 | out[6 + 2] << 16 | out[5 + 2] << 24;
-        meterID = out[12 + 2] | out[11 + 2] << 8 | out[10 + 2] << 16 | out[9 + 2] << 24;
+        meterID2 = bytes_to_int(out, 7);
+        meterID = bytes_to_int(out, 11);
+        counter = out[13];
+        timing = out[13 + packet_len] | out[12 + packet_len] << 8;
+        meta = pmt::dict_add(meta, pmt::mp("meterID1"), pmt::from_uint64(meterID));
+        meta = pmt::dict_add(meta, pmt::mp("meterID2"), pmt::from_uint64(meterID2));
     } else {
         return;
     }
@@ -183,7 +211,11 @@ void GridStream_impl::pdu_handler(pmt::pmt_t pdu)
         {
             std::cout << std::setw(2) << int(out[i]);
         }
-        std::cout << "\n";
+        std::cout << std::endl;
+        
+        meta = pmt::dict_add(meta, pmt::mp("counter"), pmt::from_uint64(counter));
+        meta = pmt::dict_add(meta, pmt::mp("timing"), pmt::from_double(timing * 0.01));
+        meta = pmt::dict_add(meta, pmt::mp("CRC_OK"), pmt::from_bool(receivedCRC == calculatedCRC));
 
         message_port_pub(PMTCONSTSTR__PDU_OUT,
                          (pmt::cons(meta, pmt::init_u8vector(out.size(), out))));

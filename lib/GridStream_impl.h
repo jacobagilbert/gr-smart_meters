@@ -24,6 +24,9 @@ private:
     uint16_t d_packetLengthFilter;
     uint16_t crc16(uint16_t crc, const std::vector<uint8_t>& data, size_t size);
 
+    /* converts a 4 byte field into a single integer value */    
+    uint64_t bytes_to_int(const std::vector<uint8_t> &data, size_t start_index);
+
     /*!
      * \brief Message handler for input messages
      *
